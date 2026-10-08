@@ -1,0 +1,32 @@
+<BusinessObject name="BoSalesCockpitHelper" schemaVersion="1.1">
+  <DataSource name="DsBoSalesCockpitHelper" />
+  <SimpleProperties>
+    <SimpleProperty name="pKey" type="DomPKey" />
+    <SimpleProperty name="collapseState_CardUserWelcome" type="DomBool" />
+    <SimpleProperty name="collapseState_CardActivities" type="DomBool" />
+    <SimpleProperty name="collapseState_CardSync" type="DomBool" />
+    <SimpleProperty name="numberOfListItems" type="DomInteger" />
+
+  </SimpleProperties>
+  <NestedObjects></NestedObjects>
+  <ObjectLookups></ObjectLookups>
+  <ListObjects></ListObjects>
+  <Methods>
+    <!-- Standard Methods -->
+    <Method name="beforeSaveAsync" />
+    <Method name="afterSaveAsync" />
+    <Method name="beforeLoadAsync" />
+    <Method name="afterLoadAsync" />
+    <Method name="beforeInitialize" />
+    <Method name="afterInitialize" />
+    <Method name="beforeDoValidateAsync" />
+    <Method name="afterDoValidateAsync" />
+    <Method name="beforeCreateAsync" />
+    <Method name="afterCreateAsync" />
+    <!-- Methods -->
+    <Method name="isCardVisible" />
+    <Method name="isCardMaximizable" />
+    <Method name="isCardCollapsible" />
+    <Method name="getDisplayedSubcomponentName" />
+  </Methods>
+</BusinessObject>

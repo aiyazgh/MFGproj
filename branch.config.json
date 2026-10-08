@@ -1,0 +1,9 @@
+{
+    "features": [
+        {
+            "description": "feature flag 'USE_LATEST_XSD_VALIDATIONS' to determine which set of XSD files should be used for build / validate commands as well as auto-completion; for changes to take effect, you'll need to run 'sf modeler workspace upgrade' once",
+            "key": "USE_LATEST_XSD_VALIDATIONS",
+            "value": false
+        }
+    ]
+}

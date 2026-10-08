@@ -1,0 +1,130 @@
+<Process name="Application::CockpitProcess" defaultAction="ShowCockpit" schemaVersion="0.0.0.5">
+  <Entry>
+    <ProcessContext>
+      <Declarations>
+        <!-- Card: User Welcome -->
+        <Declaration name="CardUserWelcome_DataLoaded" type="DomBool" />
+        <!-- Card: Activities -->
+        <Declaration name="CardActivities_InformationText" type="String" />
+        <Declaration name="CardActivities_ActivitiesList" type="LoActivities" />
+        <Declaration name="CardActivities_DataLoaded" type="DomBool" />
+        <Declaration name="CardActivities_DisplayedSubcomponentName" type="String" />
+        <Declaration name="CardActivities_ActivitiesCount" type="LuActivitiesCount" />
+        <!-- General params-->
+        <Declaration name="CardController" type="BoSalesCockpitHelper" />
+        <Declaration name="CardDate" type="String" />
+      </Declarations>
+    </ProcessContext>
+    <EntryActions>
+      <!-- Card Controller-->
+      <Action name="CreateCardController" actionType="Create" type="BoSalesCockpitHelper" >
+        <Return name="ProcessContext::CardController" />
+      </Action>
+      <!-- Create Activity List-->
+      <Action name="CardActivities_GetCustomerActivitiesList" actionType="CREATE" type="LoActivities">
+        <Return name="ProcessContext::CardActivities_ActivitiesList" />
+      </Action>
+      <!-- Initiate CardDate -->
+      <Action actionType="LOGIC" name="SetCardDate" call="Utils.createAnsiDateToday">
+        <Return name="ProcessContext::CardDate" />
+      </Action>
+    </EntryActions>
+  </Entry>
+  <Body>
+    <Actions>
+      <!-- VIEW Action START-->
+      <Action name="ShowCockpit" actionType="VIEW">
+        <UIDescription>Application::CockpitUI</UIDescription>
+        <Events>
+          <!-- Card: User Welcome-->
+          <Event name="CardUserWelcome_loadData" action="CardUserWelcome_loadData" />
+          <!-- Card: Activities -->
+          <Event name="CardActivities_loadData" action="CardActivities_LoadActivities" />
+          <Event name="CardActivities_ShowAllActivitiesPressed" action="CardActivities_ShowAllActivities" />   
+          <!--Manually Refresh Cockpit -->
+          <Event name="refreshCockpitUI" action="ReloadCockpitCards" />
+          <!-- Burger Menu Events -->
+          <Event name="synchronizeData" action="SyncOverviewProcess" />
+          <Event name="openAboutScreen" action="OpenAboutScreen" />
+          <Event name="openUsrSettings" action="UsrSettings" />
+          <Event name="User_Logout" action="LogoutUser" />
+        </Events>
+      </Action>
+      <!-- VIEW Action END-->
+      <!-- Card: User Welcome  START-->
+      <Action name="CardUserWelcome_loadData" actionType="LOAD" type="LuActivitiesCount">
+        <Parameters>
+          <Input name="cardDate" type="Binding" value="ProcessContext::CardDate" />
+          <Input name="limitDueToFormFactor" type="Literal" value="-1" />
+        </Parameters>
+        <Return name="ProcessContext::CardActivities_ActivitiesCount" />
+        <TransitionTo action="SetCardUserWelcome_DataLoaded" />
+      </Action>
+      <Action name="SetCardUserWelcome_DataLoaded" actionType="LOGIC" call="Utils.identity">
+        <Return name="ProcessContext::CardUserWelcome_DataLoaded" />
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+      </Action>
+      <!-- Card: User Welcome  END-->
+
+      <!-- Card: Activities START -->
+      <Action name="CardActivities_LoadActivities" actionType="LOGIC" call="ProcessContext::CardActivities_ActivitiesList.getActivitiesForCard">
+        <Parameters>
+          <Input name="cardDate" value="ProcessContext::CardDate" />
+        </Parameters>
+        <Return name="ProcessContext::CardActivities_ActivitiesList" />
+        <TransitionTo action="CardActivities_LoadActivitiesCount" />
+      </Action>
+      <Action name="CardActivities_LoadActivitiesCount" actionType="LOAD" type="LuActivitiesCount">
+        <Parameters>
+          <Input name="cardDate" type="Binding" value="ProcessContext::CardDate" />
+          <Input name="limitDueToFormFactor" type="Literal" value="-1" />
+        </Parameters>
+        <Return name="ProcessContext::CardActivities_ActivitiesCount" />
+        <TransitionTo action="CardActivities_GetCardInformation" />
+      </Action>
+      <Action name="CardActivities_GetCardInformation" actionType="LOGIC" call="ProcessContext::CardActivities_ActivitiesList.getInfoForActivitiesCard">
+        <Parameters>
+          <Input name="activitiesCount" type="Binding" value="ProcessContext::CardActivities_ActivitiesCount.activitiesCount" />
+        </Parameters>
+        <Return name="ProcessContext::CardActivities_InformationText" />
+        <TransitionTo action="AssignDisplayedSubcomponentNameForActivities" />
+      </Action>
+      <Action name="AssignDisplayedSubcomponentNameForActivities" actionType="LOGIC" call="ProcessContext::CardController.getDisplayedSubcomponentName">
+        <Parameters>
+          <Input name="loItems" value="ProcessContext::CardActivities_ActivitiesList" />
+          <Input name="type" value="Activities" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::CardActivities_DisplayedSubcomponentName" />
+        <TransitionTo action="SetCardActivities_DataLoaded" />
+      </Action>
+      <Action name="SetCardActivities_DataLoaded" actionType="LOGIC" call="Utils.identity">
+        <Parameters>
+          <Input name="value" value="1" type="Literal" />
+        </Parameters>
+        <Return name="ProcessContext::CardActivities_DataLoaded" />
+      </Action>
+      <Action name="CardActivities_ShowAllActivities" actionType="PROCESS" process="Call::ActivitiesListProcess">
+        <TransitionTo action="ShowCockpit" />
+      </Action>
+      <!-- Card: Activities END -->
+
+      <!-- Burger MenuItem Events START -->
+      <Action actionType="LOGIC" name="LogoutUser" call="ApplicationContext::User.logout" />
+      <Action actionType="PROCESS" name="SyncOverviewProcess" process="Sync::OverviewProcess" />
+      <Action actionType="PROCESS" name="OpenAboutScreen" process="Application::AboutProcess" />
+      <Action actionType="PROCESS" name="UsrSettings" process="User::UsrSettingsProcess"/>
+      <!-- Burger MenuItem Events END -->
+    
+      <!-- Cards: Reload Cockpit START -->
+      <Action actionType="LOGIC" name="ReloadCockpitCards" call="CardController.triggerReload">
+        <Parameters>
+          <Input name="areaName" value="mainArea" type="Literal" />
+        </Parameters>
+        <TransitionTo action="ShowCockpit" />
+      </Action>
+      <!-- Cards: Reload Cockpit END-->
+    </Actions>
+  </Body>
+</Process>
